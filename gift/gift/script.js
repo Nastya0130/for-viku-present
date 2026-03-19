@@ -1,13 +1,14 @@
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 
-// ПРЯМЕ ПОСИЛАННЯ ДЛЯ ПЛЕЄРА (через docuc?export=download)
+// ПРЯМЕ ПОСИЛАННЯ (через uc?export=download)
 const videoLink = "https://docs.google.com/uc?export=download&id=1F7gyWmcn2E9V3G7Q4pDshOkPtFjq8Tcc";
 
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
-const phrase = "HAPPY BIRTHDAY ";
-const charArray = phrase.split("");
+
+// Символи для матриці: букви + сердечка
+const symbols = "HAPPYBIRTHDAY♥❤❣❤".split("");
 const fontSize = 18;
 const columns = canvas.width / fontSize;
 const drops = Array(Math.floor(columns)).fill(1);
@@ -15,12 +16,24 @@ const drops = Array(Math.floor(columns)).fill(1);
 function drawMatrix() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#FF1493";
+    
     ctx.font = fontSize + "px monospace";
+
     drops.forEach((y, i) => {
-        const text = charArray[Math.floor(Math.random() * charArray.length)];
-        ctx.fillText(text, i * fontSize, y * fontSize);
-        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+        
+        // Якщо це сердечко — робимо його яскравішим
+        if (symbol === "♥" || symbol === "❤" || symbol === "❣") {
+            ctx.fillStyle = "#FF69B4"; // Яскраво-рожевий для сердечок
+        } else {
+            ctx.fillStyle = "#FF1493"; // Стандартний колір для букв
+        }
+
+        ctx.fillText(symbol, i * fontSize, y * fontSize);
+        
+        if (y * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
         drops[i]++;
     });
 }
@@ -30,11 +43,10 @@ const mainText = document.getElementById('main-text');
 const heartContainer = document.getElementById('heart-container');
 const videoContainer = document.getElementById('video-container');
 const video = document.getElementById('birthday-video');
-const unmuteOverlay = document.getElementById('unmute-overlay');
 
-// Починаємо завантаження відео відразу, щоб телефон встиг
+// Завантажуємо відео заздалегідь
 video.src = videoLink;
-video.load(); 
+video.load();
 
 const sequence = ["3", "2", "1", "Вікуся 🤍"];
 let step = 0;
@@ -75,51 +87,21 @@ function explode() {
         p.style.transform = `translate(${(Math.random()-0.5)*1000}px, ${(Math.random()-0.5)*1000}px) scale(0)`;
         p.style.opacity = '0';
     });
+    
     setTimeout(() => {
+        // Ховаємо матрицю і текст
+        canvas.style.display = 'none';
+        mainText.style.display = 'none';
+        
+        // Показуємо відео
         videoContainer.classList.add('show-flex');
         
-        // Показуємо шар для увімкнення звуку
-        if (unmuteOverlay) {
-            unmuteOverlay.style.display = 'block';
-        }
-        
-        // Спробуємо запустити відео (спочатку без звуку, бо телефон блокує)
+        // На телефонах відео ТРЕБА запускати без звуку (muted), 
+        // інакше воно просто не почнеться автоматично. 
+        // Вікуся сама натисне на іконку звуку в плеєрі.
         video.muted = true;
-        video.play().catch(() => {
-            // Якщо навіть без звуку не запускається, просто чекаємо кліку
-        });
-
-        // Падаючі сердечка по боках (я виправив код, тепер вони працюють)
-        startSideHearts();
-    }, 800);
-}
-
-// Функція для звуку по кліку (після вибуху серця)
-if (unmuteOverlay) {
-    unmuteOverlay.onclick = () => {
-        video.muted = false;
         video.play();
-        unmuteOverlay.style.display = 'none';
-    };
-}
-
-function startSideHearts() {
-    const containers = [document.querySelector('.left'), document.querySelector('.right')];
-    setInterval(() => {
-        containers.forEach(c => {
-            if (c) {
-                const h = document.createElement('div');
-                h.className = 'side-heart-pixel';
-                h.innerHTML = '♥';
-                h.style.left = Math.random() * 100 + '%';
-                // Випадковий розмір і швидкість
-                h.style.fontSize = (15 + Math.random() * 15) + 'px';
-                h.style.animationDuration = (3 + Math.random() * 2) + 's';
-                c.appendChild(h);
-                setTimeout(() => h.remove(), 5000);
-            }
-        });
-    }, 500); // Частіше з'являються
+    }, 800);
 }
 
 setTimeout(runSequence, 1000);
