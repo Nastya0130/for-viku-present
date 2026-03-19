@@ -8,16 +8,14 @@
 </head>
 <body>
     <canvas id="matrix"></canvas>
-    
-    <div id="bg-hearts"></div>
-
     <div class="message-container"><h1 id="main-text"></h1></div>
     <div id="heart-container"></div>
 
     <div id="video-container">
-        <video id="birthday-video" playsinline preload="auto">
-            <source src="video.mp4.mp4" type="video/mp4">
-        </video>
+        <video id="birthday-video" playsinline preload="auto" controls></video>
+        <div class="side-hearts left"></div>
+        <div class="side-hearts right"></div>
+        <div id="unmute-overlay" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:200; display:none; cursor:pointer;"></div>
     </div>
     <script src="script.js"></script>
 </body>
