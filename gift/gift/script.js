@@ -1,13 +1,13 @@
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 
-// Пряме посилання
 const videoLink = "https://docs.google.com/uc?export=download&id=1F7gyWmcn2E9V3G7Q4pDshOkPtFjq8Tcc";
 
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-// СИМВОЛИ: Букви + Багато сердечок для матриці
+// СИМВОЛИ ДЛЯ ФОНУ (Матриця)
+// Тут і букви, і сердечка, які будуть падати ЗА текстом
 const symbols = "HAPPYBIRTHDAY♥♥♥♥♥♥".split("");
 const fontSize = 18;
 const columns = canvas.width / fontSize;
@@ -20,7 +20,6 @@ function drawMatrix() {
 
     drops.forEach((y, i) => {
         const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-        // Сердечка робимо яскравішими
         ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
         ctx.fillText(symbol, i * fontSize, y * fontSize);
         
@@ -32,23 +31,30 @@ setInterval(drawMatrix, 35);
 
 const video = document.getElementById('birthday-video');
 const videoContainer = document.getElementById('video-container');
-video.src = videoLink;
+const mainText = document.getElementById('main-text');
+const heartContainer = document.getElementById('heart-container');
 
-// ЦЕ ВАЖЛИВО: активуємо відео при першому ж дотику до екрана
-document.body.addEventListener('touchstart', () => {
-    video.play(); 
-    video.pause(); // Просто "будимо" плеєр
+video.src = videoLink;
+video.load();
+
+// Активуємо звук при першому торканні
+document.addEventListener('touchstart', () => {
+    video.play().then(() => { video.pause(); });
 }, {once: true});
 
+// ТЕКСТ ТЕПЕР В ОДНОМУ РЯДКУ І ПО ЦЕНТРУ
 const sequence = ["3", "2", "1", "Вікуся 🤍"];
 let step = 0;
 
 function runSequence() {
     if (step < sequence.length) {
-        document.getElementById('main-text').innerHTML = sequence[step];
-        document.getElementById('main-text').classList.add('show');
+        // Очищуємо і ставимо новий текст
+        mainText.style.whiteSpace = "nowrap"; // Щоб не переносило на новий рядок
+        mainText.innerHTML = sequence[step];
+        mainText.classList.add('show');
+        
         setTimeout(() => {
-            document.getElementById('main-text').classList.remove('show');
+            mainText.classList.remove('show');
             step++;
             setTimeout(runSequence, 600);
         }, 1200);
@@ -58,7 +64,6 @@ function runSequence() {
 }
 
 function createHeart() {
-    const heartContainer = document.getElementById('heart-container');
     const num = 100;
     const scale = 10;
     for (let i = 0; i < num; i++) {
@@ -83,12 +88,12 @@ function explode() {
     
     setTimeout(() => {
         canvas.style.display = 'none';
-        document.getElementById('main-text').style.display = 'none';
+        mainText.style.display = 'none';
         videoContainer.classList.add('show-flex');
         
-        video.muted = false; // Пробуємо зі звуком
+        video.muted = false;
         video.play().catch(() => {
-            video.muted = true; // Якщо не дає, запускаємо без звуку
+            video.muted = true;
             video.play();
         });
     }, 600);
