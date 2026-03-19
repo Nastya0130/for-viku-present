@@ -1,14 +1,14 @@
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 
-// Пряме посилання для вбудованого плеєра
+// Пряме посилання
 const videoLink = "https://docs.google.com/uc?export=download&id=1F7gyWmcn2E9V3G7Q4pDshOkPtFjq8Tcc";
 
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-// Додаємо сердечка прямо в масив символів
-const symbols = "HAPPYBIRTHDAY♥♥♥".split("");
+// СИМВОЛИ: Букви + Багато сердечок для матриці
+const symbols = "HAPPYBIRTHDAY♥♥♥♥♥♥".split("");
 const fontSize = 18;
 const columns = canvas.width / fontSize;
 const drops = Array(Math.floor(columns)).fill(1);
@@ -16,47 +16,39 @@ const drops = Array(Math.floor(columns)).fill(1);
 function drawMatrix() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
     ctx.font = fontSize + "px monospace";
 
     drops.forEach((y, i) => {
         const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-        
-        // Малюємо сердечка яскравішим кольором
-        if (symbol === "♥") {
-            ctx.fillStyle = "#FF69B4"; 
-        } else {
-            ctx.fillStyle = "#FF1493"; 
-        }
-
+        // Сердечка робимо яскравішими
+        ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
         ctx.fillText(symbol, i * fontSize, y * fontSize);
         
-        if (y * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
-        }
+        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
     });
 }
 setInterval(drawMatrix, 35);
 
-const mainText = document.getElementById('main-text');
-const heartContainer = document.getElementById('heart-container');
-const videoContainer = document.getElementById('video-container');
 const video = document.getElementById('birthday-video');
-
-// Налаштування відео
+const videoContainer = document.getElementById('video-container');
 video.src = videoLink;
-video.preload = "auto";
+
+// ЦЕ ВАЖЛИВО: активуємо відео при першому ж дотику до екрана
+document.body.addEventListener('touchstart', () => {
+    video.play(); 
+    video.pause(); // Просто "будимо" плеєр
+}, {once: true});
 
 const sequence = ["3", "2", "1", "Вікуся 🤍"];
 let step = 0;
 
 function runSequence() {
     if (step < sequence.length) {
-        mainText.innerHTML = sequence[step];
-        mainText.classList.add('show');
+        document.getElementById('main-text').innerHTML = sequence[step];
+        document.getElementById('main-text').classList.add('show');
         setTimeout(() => {
-            mainText.classList.remove('show');
+            document.getElementById('main-text').classList.remove('show');
             step++;
             setTimeout(runSequence, 600);
         }, 1200);
@@ -66,6 +58,7 @@ function runSequence() {
 }
 
 function createHeart() {
+    const heartContainer = document.getElementById('heart-container');
     const num = 100;
     const scale = 10;
     for (let i = 0; i < num; i++) {
@@ -90,13 +83,14 @@ function explode() {
     
     setTimeout(() => {
         canvas.style.display = 'none';
-        mainText.style.display = 'none';
+        document.getElementById('main-text').style.display = 'none';
+        videoContainer.classList.add('show-flex');
         
-        if(videoContainer) videoContainer.classList.add('show-flex');
-        
-        // Автозапуск на телефонах працює тільки muted
-        video.muted = true;
-        video.play().catch(e => console.log("Помилка автозапуску:", e));
+        video.muted = false; // Пробуємо зі звуком
+        video.play().catch(() => {
+            video.muted = true; // Якщо не дає, запускаємо без звуку
+            video.play();
+        });
     }, 600);
 }
 
