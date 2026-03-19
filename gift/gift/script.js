@@ -6,8 +6,7 @@ const videoLink = "https://docs.google.com/uc?export=download&id=1F7gyWmcn2E9V3G
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-// СИМВОЛИ ДЛЯ ФОНУ (Матриця)
-// Тут і букви, і сердечка, які будуть падати ЗА текстом
+// СИМВОЛИ ДЛЯ ФОНУ (По всьому периметру)
 const symbols = "HAPPYBIRTHDAY♥♥♥♥♥♥".split("");
 const fontSize = 18;
 const columns = canvas.width / fontSize;
@@ -37,22 +36,36 @@ const heartContainer = document.getElementById('heart-container');
 video.src = videoLink;
 video.load();
 
-// Активуємо звук при першому торканні
+// Хитрість для звуку при першому торканні
 document.addEventListener('touchstart', () => {
     video.play().then(() => { video.pause(); });
 }, {once: true});
 
-// ТЕКСТ ТЕПЕР В ОДНОМУ РЯДКУ І ПО ЦЕНТРУ
+// ПОСЛІДОВНІСТЬ ТЕКСТУ ПО ЦЕНТРУ
 const sequence = ["3", "2", "1", "Вікуся 🤍"];
 let step = 0;
 
 function runSequence() {
     if (step < sequence.length) {
         // Очищуємо і ставимо новий текст
-        mainText.style.whiteSpace = "nowrap"; // Щоб не переносило на новий рядок
         mainText.innerHTML = sequence[step];
         mainText.classList.add('show');
         
+        // Робимо так, щоб текст був чітко по центру в один рядок
+        mainText.style.display = "flex";
+        mainText.style.alignItems = "center";
+        mainText.style.justifyContent = "center";
+        mainText.style.width = "100%";
+        mainText.style.whiteSpace = "nowrap"; // Щоб не переносило на новий рядок
+        mainText.style.position = "absolute";
+        mainText.style.left = "0";
+        mainText.style.top = "50%";
+        mainText.style.transform = "translateY(-50%)";
+        mainText.style.color = "white"; // Колір тексту білий, щоб було видно на рожевому фоні
+        mainText.style.fontSize = "48px"; // Збільшений розмір тексту
+        mainText.style.fontFamily = "sans-serif"; // Змінений шрифт для чіткості
+        mainText.style.zIndex = "10"; // Текст зверху матриці
+
         setTimeout(() => {
             mainText.classList.remove('show');
             step++;
@@ -74,6 +87,7 @@ function createHeart() {
         p.className = "pixel";
         p.style.left = (window.innerWidth/2 + x) + "px";
         p.style.top = (window.innerHeight/2 + y) + "px";
+        p.style.zIndex = "20"; // Серце зверху всього
         heartContainer.appendChild(p);
         setTimeout(() => p.classList.add('show'), i * 10);
     }
