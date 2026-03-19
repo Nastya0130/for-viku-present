@@ -6,21 +6,30 @@ const videoLink = "https://docs.google.com/uc?export=download&id=1F7gyWmcn2E9V3G
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-// СИМВОЛИ ДЛЯ ФОНУ (По всьому периметру)
 const symbols = "HAPPYBIRTHDAY♥♥♥♥♥♥".split("");
 const fontSize = 18;
-const columns = canvas.width / fontSize;
-const drops = Array(Math.floor(columns)).fill(1);
+const columns = Math.floor(canvas.width / fontSize);
+const drops = Array(columns).fill(1);
+
+// Визначаємо "зону відчуження" для тексту (стовпчики по центру)
+const centerCol = Math.floor(columns / 2);
+const safeZoneWidth = 8; // Скільки стовпчиків зліва і справа від центру будуть порожніми
 
 function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.1)"; // Трохи темніше для чіткості
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = fontSize + "px monospace";
 
     drops.forEach((y, i) => {
-        const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-        ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
-        ctx.fillText(symbol, i * fontSize, y * fontSize);
+        // ПЕРЕВІРКА: якщо стовпчик в зоні тексту, пропускаємо малювання
+        const isInSafeZone = i > (centerCol - safeZoneWidth) && i < (centerCol + safeZoneWidth);
+        
+        // Малюємо символ тільки якщо він НЕ в зоні тексту АБО якщо він вже впав нижче центру
+        if (!isInSafeZone || (y * fontSize > canvas.height * 0.65 || y * fontSize < canvas.height * 0.35)) {
+            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+            ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
+            ctx.fillText(symbol, i * fontSize, y * fontSize);
+        }
         
         if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
@@ -34,37 +43,35 @@ const mainText = document.getElementById('main-text');
 const heartContainer = document.getElementById('heart-container');
 
 video.src = videoLink;
-video.load();
 
-// Хитрість для звуку при першому торканні
 document.addEventListener('touchstart', () => {
     video.play().then(() => { video.pause(); });
 }, {once: true});
 
-// ПОСЛІДОВНІСТЬ ТЕКСТУ ПО ЦЕНТРУ
 const sequence = ["3", "2", "1", "Вікуся 🤍"];
 let step = 0;
 
 function runSequence() {
     if (step < sequence.length) {
-        // Очищуємо і ставимо новий текст
         mainText.innerHTML = sequence[step];
         mainText.classList.add('show');
         
-        // Робимо так, щоб текст був чітко по центру в один рядок
-        mainText.style.display = "flex";
-        mainText.style.alignItems = "center";
-        mainText.style.justifyContent = "center";
-        mainText.style.width = "100%";
-        mainText.style.whiteSpace = "nowrap"; // Щоб не переносило на новий рядок
-        mainText.style.position = "absolute";
-        mainText.style.left = "0";
-        mainText.style.top = "50%";
-        mainText.style.transform = "translateY(-50%)";
-        mainText.style.color = "white"; // Колір тексту білий, щоб було видно на рожевому фоні
-        mainText.style.fontSize = "48px"; // Збільшений розмір тексту
-        mainText.style.fontFamily = "sans-serif"; // Змінений шрифт для чіткості
-        mainText.style.zIndex = "10"; // Текст зверху матриці
+        // Фіксуємо стиль, щоб нічого не з'їжджало
+        Object.assign(mainText.style, {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            position: "absolute",
+            left: "0",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "white",
+            fontSize: "55px",
+            fontWeight: "bold",
+            zIndex: "100",
+            textShadow: "0 0 15px rgba(255, 20, 147, 0.8)"
+        });
 
         setTimeout(() => {
             mainText.classList.remove('show');
@@ -77,8 +84,8 @@ function runSequence() {
 }
 
 function createHeart() {
-    const num = 100;
-    const scale = 10;
+    const num = 120;
+    const scale = 11;
     for (let i = 0; i < num; i++) {
         const a = i * Math.PI * 2 / num;
         const x = scale * (16 * Math.pow(Math.sin(a), 3));
@@ -87,7 +94,6 @@ function createHeart() {
         p.className = "pixel";
         p.style.left = (window.innerWidth/2 + x) + "px";
         p.style.top = (window.innerHeight/2 + y) + "px";
-        p.style.zIndex = "20"; // Серце зверху всього
         heartContainer.appendChild(p);
         setTimeout(() => p.classList.add('show'), i * 10);
     }
@@ -96,21 +102,4 @@ function createHeart() {
 
 function explode() {
     document.querySelectorAll('.pixel').forEach(p => {
-        p.style.transform = `translate(${(Math.random()-0.5)*800}px, ${(Math.random()-0.5)*800}px) scale(0)`;
-        p.style.opacity = '0';
-    });
-    
-    setTimeout(() => {
-        canvas.style.display = 'none';
-        mainText.style.display = 'none';
-        videoContainer.classList.add('show-flex');
-        
-        video.muted = false;
-        video.play().catch(() => {
-            video.muted = true;
-            video.play();
-        });
-    }, 600);
-}
-
-setTimeout(runSequence, 1000);
+        p.style.transform = `translate(${(Math.random()-0.5)*1
