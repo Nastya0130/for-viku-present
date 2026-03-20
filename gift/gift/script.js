@@ -1,6 +1,7 @@
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 
+// Пряме посилання на відео з Google Диску
 const videoLink = "https://docs.google.com/uc?id=1F7gyWmcn2E9V3G7Q4pDshOkPtFjq8Tcc&export=download";
 
 canvas.height = window.innerHeight;
@@ -17,7 +18,7 @@ function drawMatrix() {
     ctx.font = fontSize + "px monospace";
 
     drops.forEach((y, i) => {
-        // ЖОДНИХ ПРЯМОКУТНИКІВ: Малюємо по всьому екрану
+        // Тепер малюємо всюди, без обмежень і прямокутників
         const symbol = symbols[Math.floor(Math.random() * symbols.length)];
         ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
         ctx.fillText(symbol, i * fontSize, y * fontSize);
@@ -33,9 +34,8 @@ const videoContainer = document.getElementById('video-container');
 const mainText = document.getElementById('main-text');
 const heartContainer = document.getElementById('heart-container');
 
-// Налаштування відео
 video.src = videoLink;
-video.preload = "auto";
+video.setAttribute('playsinline', ''); // Важливо для iPhone
 
 // Активуємо відео при першому торканні екрана
 document.addEventListener('touchstart', () => {
@@ -54,12 +54,12 @@ function runSequence() {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            zIndex: "100", // Текст завжди зверху матриці
+            zIndex: "100",
             color: "white",
             fontSize: "55px",
             whiteSpace: "nowrap",
             fontFamily: "sans-serif",
-            textShadow: "0 0 10px rgba(255, 20, 147, 0.8)" // Світіння навколо тексту
+            textShadow: "0 0 10px rgba(255, 20, 147, 0.8)"
         });
 
         mainText.classList.add('show');
@@ -101,9 +101,9 @@ function explode() {
         mainText.style.display = 'none';
         videoContainer.classList.add('show-flex');
         
-        video.muted = false; // Пробуємо зі звуком
+        video.muted = false; 
         video.play().catch(() => {
-            video.muted = true; // Якщо телефон блокує, запускаємо без звуку
+            video.muted = true; 
             video.play();
         });
     }, 600);
