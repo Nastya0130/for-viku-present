@@ -1,33 +1,27 @@
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 
-const videoLink = "https://docs.google.com/uc?id=1F7gyWmcn2E9V3G7Q4pDshOkPtFjq8Tcc&export=download";
+// Використовуємо найнадійніший формат посилання
+const videoLink = "https://docs.google.com/uc?export=download&id=1F7gyWmcn2E9V3G7Q4pDshOkPtFjq8Tcc";
 
 canvas.height = window.innerHeight;
 canvas.width = window.innerWidth;
 
-const symbols = "HAPPYBIRTHDAY♥♥♥♥♥♥".split("");
+// Букви + сердечка разом
+const symbols = "HAPPYBIRTHDAY♥♥♥".split("");
 const fontSize = 18;
-const columns = Math.floor(canvas.width / fontSize);
-const drops = Array(columns).fill(1);
-
-const centerCol = Math.floor(columns / 2);
-const safeZoneWidth = 6; 
+const columns = canvas.width / fontSize;
+const drops = Array(Math.floor(columns)).fill(1);
 
 function drawMatrix() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = fontSize + "px monospace";
 
     drops.forEach((y, i) => {
-        const isInSafeZone = i > (centerCol - safeZoneWidth) && i < (centerCol + safeZoneWidth);
-        const isNearCenterHeight = (y * fontSize > canvas.height * 0.3) && (y * fontSize < canvas.height * 0.7);
-
-        if (!(isInSafeZone && isNearCenterHeight)) {
-            const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-            ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
-            ctx.fillText(symbol, i * fontSize, y * fontSize);
-        }
+        const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+        ctx.fillStyle = (symbol === "♥") ? "#FF69B4" : "#FF1493";
+        ctx.fillText(symbol, i * fontSize, y * fontSize);
         
         if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
@@ -38,10 +32,11 @@ setInterval(drawMatrix, 35);
 const video = document.getElementById('birthday-video');
 const videoContainer = document.getElementById('video-container');
 const mainText = document.getElementById('main-text');
-const heartContainer = document.getElementById('heart-container');
 
 video.src = videoLink;
+video.load();
 
+// Активуємо відео при першому торканні екрана
 document.addEventListener('touchstart', () => {
     video.play().then(() => { video.pause(); });
 }, {once: true});
@@ -52,19 +47,6 @@ let step = 0;
 function runSequence() {
     if (step < sequence.length) {
         mainText.innerHTML = sequence[step];
-        Object.assign(mainText.style, {
-            display: "flex",
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: "100",
-            color: "white",
-            fontSize: "50px",
-            whiteSpace: "nowrap",
-            fontFamily: "sans-serif"
-        });
-
         mainText.classList.add('show');
         setTimeout(() => {
             mainText.classList.remove('show');
@@ -77,8 +59,9 @@ function runSequence() {
 }
 
 function createHeart() {
+    const heartContainer = document.getElementById('heart-container');
     const num = 100;
-    const scale = 11;
+    const scale = 10;
     for (let i = 0; i < num; i++) {
         const a = i * Math.PI * 2 / num;
         const x = scale * (16 * Math.pow(Math.sin(a), 3));
@@ -95,7 +78,7 @@ function createHeart() {
 
 function explode() {
     document.querySelectorAll('.pixel').forEach(p => {
-        p.style.transform = `translate(${(Math.random()-0.5)*1000}px, ${(Math.random()-0.5)*1000}px) scale(0)`;
+        p.style.transform = `translate(${(Math.random()-0.5)*800}px, ${(Math.random()-0.5)*800}px) scale(0)`;
         p.style.opacity = '0';
     });
     
@@ -103,12 +86,7 @@ function explode() {
         canvas.style.display = 'none';
         mainText.style.display = 'none';
         videoContainer.classList.add('show-flex');
-        video.muted = false;
-        video.play().catch(() => {
-            video.muted = true;
-            video.play();
-        });
+        
+        video.muted = true; // Автозапуск на телефонах тільки без звуку
+        video.play();
     }, 600);
-}
-
-setTimeout(runSequence, 1000);
